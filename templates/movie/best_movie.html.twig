@@ -1,0 +1,29 @@
+<div class="main-header">
+	<h2 class="page-title">
+		<i class="fas fa-filter"></i>
+		Meilleur Film
+	</h2>
+	<p class="page-subtitle">
+		Découvrez le meilleur film.
+	</p>
+</div>
+<div class="featured-movie">
+	<div class="featured-movie__poster">
+		<img src="https://image.tmdb.org/t/p/w780{{ featuredMovie.posterPath }}" alt="{{ featuredMovie.title }}">
+	</div>
+	<div class="featured-movie__info">
+		<h2>{{ featuredMovie.title }}</h2>
+		<p class="overview">{{ featuredMovie.overview }}</p>
+		<div class="meta">
+			<span class="year">{{ featuredMovie.releaseDate|date('Y') }}</span>
+			<span class="rating">★
+				{{ featuredMovie.voteAverage|number_format(1) }}</span>
+		</div>
+		<div
+			class="video-container" data-movie-id="{{ featuredMovie.id }}">{# La vidéo  #}
+		</div>
+		<button class="watch-trailer" data-movie-id="{{ featuredMovie.id }}">
+			Voir la bande annonce
+		</button>
+	</div>
+</div>

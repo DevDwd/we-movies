@@ -1,0 +1,41 @@
+{# templates/movie/index.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}
+	We Movies
+{% endblock %}
+
+{% block body %}
+
+	{# Section film à la une #}
+	{% if featuredMovie %}
+		{% include '/movie/best_movie.html.twig' %}
+	{% endif %}
+
+	<div class="main-header">
+		<h2 class="page-title">
+			{% if selectedGenreIds is defined and selectedGenreIds|length > 0 %}
+				<i class="fas fa-filter"></i>
+				Films filtrés
+			{% else %}
+				<i class="fas fa-star"></i>
+				Films Populaires
+			{% endif %}
+		</h2>
+		<p class="page-subtitle">
+			{% if selectedGenreIds is defined and selectedGenreIds|length > 0 %}
+				Découvrez les films en fonction de vos critères de sélection.
+			{% else %}
+				Retrouvez les films les plus populaires du moment.
+			{% endif %}
+		</p>
+	</div>
+
+
+	{# Section liste de film #}
+	{% include '/movie/movies_grid.html.twig' %}
+
+	{# Modal pour les détails du film #}
+	{% include '/movie/modal.html.twig' %}
+
+{% endblock %}

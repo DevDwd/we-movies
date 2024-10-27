@@ -1,0 +1,5 @@
+# config/packages/test/services.yaml
+services:
+    App\Application\Service\TMDBService:
+        class: App\Tests\Service\MockTMDBService
+        public: true
