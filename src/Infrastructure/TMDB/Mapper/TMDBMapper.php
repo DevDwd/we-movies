@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\TMDB\Mapper;
 
-use App\Domain\Entity\Genre;
-use App\Domain\Entity\Movie;
+use App\Domain\Model\Genre;
+use App\Domain\Model\Movie;
 
 class TMDBMapper
 {

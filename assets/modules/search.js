@@ -1,6 +1,6 @@
 // assets/modules/search.js
 
-import MovieModal from './modal';
+import MovieModal from './modal.js';
 
 export default class MovieSearch {
     constructor() {
@@ -58,6 +58,8 @@ export default class MovieSearch {
         if (!movies || movies.length === 0) {
             this.searchResults.innerHTML = '<div class="no-results">Aucun film trouvé</div>';
         } else {
+            console.log('1');
+            console.log("https://image.tmdb.org/t/p/w92${movie.posterPath}");
             this.searchResults.innerHTML = movies.map(movie => `
                 <div class="search-result-item" data-movie-id="${movie.id}">
                     <div class="movie-poster">
@@ -110,7 +112,7 @@ export default class MovieSearch {
             item.addEventListener('click', () => {
                 const movieId = item.dataset.movieId;
                 console.log('Movie clicked:', movieId);
-                window.location.href = `/movie/${movieId}`;
+                window.location.href = `/api/movie/${movieId}`;
             });
         });
     }

@@ -1,6 +1,6 @@
 // assets/modules/genre-filter.js
 
-export default class GenreFilter {
+export default class GenreFilter { 
     constructor() {
         this.form = document.getElementById('genre-filter-form');
         this.checkboxes = document.querySelectorAll('.genre-checkbox');

@@ -1,57 +1,63 @@
-{# templates/base.html.twig #}
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>
-			{% block title %}We Movies
-			{% endblock %}
-		</title>
-		{% block stylesheets %}
-			{{ encore_entry_link_tags('app') }}
-		{% endblock %}
-	</head>
-	<body>
-		<nav class="navbar">
-			<div class="container">
-				<div class="navbar-content">
-					<div class="navbar-brand">
-						<a href="{{ path('app_home') }}">
-							<h1>We Movies</h1>
-						</a>
-					</div>
-					<div class="search-container">
-						<input type="text" class="search-input" placeholder="Rechercher un film...">
-						<div class="search-results" style="display: none;"></div>
-					</div>
-				</div>
-			</div>
-		</nav>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}Welcome!{% endblock %}</title>
+        
+        {% block stylesheets %}
+            {{ encore_entry_link_tags('app') }}
+        {% endblock %}
+    </head>
+    <body>
+        <nav class="navbar">
+            <div class="container">
+                <div class="navbar-content">
+                    <div class="navbar-brand">
+                        <h1><a href="{{ path('app_home') }}">We Movies</a></h1>
+                    </div>
+                    <div class="search-container">
+                        <input type="text" class="search-input" placeholder="Rechercher un film...">
+                        <div class="search-results"></div>
+                    </div>
+                </div>
+            </div>
+        </nav>
 
-		<main class="container">
-			<div class="content-wrapper">
-				<aside class="sidebar">
-					<div class="genres-list">
-						<h2>Filtrer par genres</h2>
-						<form id="genre-filter-form" class="genre-form">
-							{% for genre in genres|default([]) %}
-								<div class="genre-item">
-									<input type="checkbox" id="genre-{{ genre.id }}" name="genres[]" value="{{ genre.id }}" {% if selectedGenreIds is defined and genre.id in selectedGenreIds %} checked {% endif %} class="genre-checkbox">
-									<label for="genre-{{ genre.id }}">{{ genre.name }}</label>
-								</div>
-							{% endfor %}
-						</form>
-					</div>
-				</aside>
+        <main class="container">
+            <div class="content-wrapper">
+                <aside class="sidebar">
+                    <div class="genres-list">
+                        <h2>Genres</h2>
+                        {% if genres is defined %}
+                            <ul>
+                                {% for genre in genres %}
+                                    <li {% if selectedGenreId is defined and selectedGenreId == genre.id %}class="active"{% endif %}>
+                                        <a href="{{ path('app_genre_movies', {id: genre.id}) }}">
+                                            {{ genre.name }}
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </aside>
+                
+                <div class="main-content">
+                    {% block body %}{% endblock %}
+                </div>
+            </div>
+        </main>
 
-				<div class="main-content"> {% block body %}{% endblock %}
-					</div>
-				</div>
-			</main>
+        <div id="movieModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <div id="movieDetails"></div>
+            </div>
+        </div>
 
-			{% block javascripts %}
-				{{ encore_entry_script_tags('app') }}
-			{% endblock %}
-		</body>
-	</html>
+        {% block javascripts %}
+            {{ encore_entry_script_tags('app') }}
+        {% endblock %}
+    </body>
+</html>

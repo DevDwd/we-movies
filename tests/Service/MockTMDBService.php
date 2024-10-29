@@ -4,57 +4,70 @@ declare(strict_types=1);
 
 namespace App\Tests\Service;
 
-use App\Application\Service\TMDBService;
-use App\Domain\Entity\Genre;
-use App\Domain\Entity\Movie;
+use App\Domain\Model\Genre;
+use App\Domain\Model\Movie;
+use App\Infrastructure\TMDB\Client\TMDBClientInterface;
 
-class MockTMDBService extends TMDBService
+class MockTMDBService implements TMDBClientInterface
 {
-    public function __construct()
-    {
-    }
-
+    /**
+     * @return array<array{id: int, name: string}>
+     */
     public function getAllGenres(): array
     {
         return [
-            new Genre(28, 'Action'),
-            new Genre(35, 'Comedy'),
+            ['id' => 28, 'name' => 'Action'],
+            ['id' => 35, 'name' => 'Comédie'],
         ];
     }
 
-    public function getPopularMovies(int $page = 1): array
+    /**
+     * @return array<array-key, array>
+     */
+    public function getPopularMovies(): array
     {
-        return [
-            $this->createTestMovie(1),
-        ];
+        return [$this->createTestMovie()->toArray()];
     }
 
-    public function getMovie(int $id): ?Movie
+    public function getMovie(int $id): ?array
     {
         if (999999 === $id) {
             return null;
         }
 
-        return $this->createTestMovie($id);
+        return $this->createTestMovie()->toArray();
     }
 
+    /**
+     * @return array<array-key, array>
+     */
     public function searchMovies(string $query): array
     {
-        if (empty(trim($query))) {
+        if (empty($query)) {
             return [];
         }
 
-        return [$this->createTestMovie(1)];
+        return [$this->createTestMovie()->toArray()];
     }
 
-    public function getMoviesByGenre(int $genreId, int $page = 1): array
+    /**
+     * @return array<array-key, array>
+     */
+    public function getMoviesByGenre(int $genreId): array
     {
-        return [$this->createTestMovie(1)];
+        if (999999 === $genreId) {
+            return [];
+        }
+
+        return [$this->createTestMovie()->toArray()];
     }
 
-    public function getMovieVideo(int $movieId): ?array
+    /**
+     * @return array{key: string, site: string, type: string}|null
+     */
+    public function getMovieVideo(int $id): ?array
     {
-        if (999999 === $movieId) {
+        if (999999 === $id) {
             return null;
         }
 
@@ -65,16 +78,17 @@ class MockTMDBService extends TMDBService
         ];
     }
 
-    private function createTestMovie(int $id): Movie
+    private function createTestMovie(): Movie
     {
         return new Movie(
-            $id,
-            'Test Movie',
-            'Test Description',
-            '/test-poster.jpg',
-            [new Genre(28, 'Action')],
-            8.5,
-            '2024-01-01'
+            id: 1,
+            title: 'Test Movie',
+            overview: 'Test Description',
+            posterPath: '/test/poster.jpg',
+            genres: [new Genre(28, 'Action')],
+            voteAverage: 8.5,
+            releaseDate: '2023-01-01',
+            userRatings: []
         );
     }
 }

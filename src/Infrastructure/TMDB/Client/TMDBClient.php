@@ -5,65 +5,151 @@ declare(strict_types=1);
 namespace App\Infrastructure\TMDB\Client;
 
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Symfony\Contracts\HttpClient\ResponseInterface;
 
-class TMDBClient
+class TMDBClient implements TMDBClientInterface
 {
-    private const BASE_URL = 'https://api.themoviedb.org/3';
-
     public function __construct(
         private readonly HttpClientInterface $httpClient,
         private readonly string $apiKey,
+        private readonly string $baseUri = 'https://api.themoviedb.org/3',
     ) {
     }
 
-    public function getGenres(): ResponseInterface
+    public function getPopularMovies(): array
     {
-        return $this->get('/genre/movie/list');
+        $response = $this->httpClient->request(
+            'GET',
+            sprintf('%s/movie/popular', $this->baseUri),
+            [
+                'query' => [
+                    'api_key' => $this->apiKey,
+                    'language' => 'fr-FR',
+                ],
+            ]
+        );
+
+        $data = $response->toArray();
+
+        return $data['results'] ?? [];
     }
 
-    public function getMoviesByGenre(int $genreId, int $page = 1): ResponseInterface
+    public function getMoviesByGenre(int $id): array
     {
-        return $this->get('/discover/movie', [
-            'with_genres' => $genreId,
-            'page' => $page,
-            'sort_by' => 'popularity.desc',
-        ]);
+        $response = $this->httpClient->request(
+            'GET',
+            sprintf('%s/discover/movie', $this->baseUri),
+            [
+                'query' => [
+                    'api_key' => $this->apiKey,
+                    'language' => 'fr-FR',
+                    'with_genres' => $id,
+                ],
+            ]
+        );
+
+        $data = $response->toArray();
+
+        return $data['results'] ?? [];
     }
 
-    public function searchMovies(string $query): ResponseInterface
+    public function getAllGenres(): array
     {
-        return $this->get('/search/movie', [
-            'query' => $query,
-        ]);
+        $response = $this->httpClient->request(
+            'GET',
+            sprintf('%s/genre/movie/list', $this->baseUri),
+            [
+                'query' => [
+                    'api_key' => $this->apiKey,
+                    'language' => 'fr-FR',
+                ],
+            ]
+        );
+
+        $data = $response->toArray();
+
+        return $data['genres'] ?? [];
     }
 
-    public function getMovie(int $id): ResponseInterface
+    public function getMovie(int $id): ?array
     {
-        return $this->get("/movie/{$id}");
+        try {
+            $response = $this->httpClient->request(
+                'GET',
+                sprintf('%s/movie/%d', $this->baseUri, $id),
+                [
+                    'query' => [
+                        'api_key' => $this->apiKey,
+                        'language' => 'fr-FR',
+                    ],
+                ]
+            );
+
+            if (404 === $response->getStatusCode()) {
+                return null;
+            }
+
+            return $response->toArray();
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 
-    public function getPopularMovies(int $page = 1): ResponseInterface
+    public function searchMovies(string $query): array
     {
-        return $this->get('/movie/popular', [
-            'page' => $page,
-        ]);
+        $response = $this->httpClient->request(
+            'GET',
+            sprintf('%s/search/movie', $this->baseUri),
+            [
+                'query' => [
+                    'api_key' => $this->apiKey,
+                    'language' => 'fr-FR',
+                    'query' => $query,
+                ],
+            ]
+        );
+
+        $data = $response->toArray();
+
+        return $data['results'] ?? [];
     }
 
-    // Ajout de la méthode manquante
-    public function getMovieVideo(int $movieId): ResponseInterface
+    public function getMovieVideo(int $id): ?array
     {
-        return $this->get("/movie/{$movieId}/videos");
-    }
+        try {
+            $response = $this->httpClient->request(
+                'GET',
+                sprintf('%s/movie/%d/videos', $this->baseUri, $id),
+                [
+                    'query' => [
+                        'api_key' => $this->apiKey,
+                        'language' => 'fr-FR',
+                    ],
+                ]
+            );
 
-    protected function get(string $endpoint, array $params = []): ResponseInterface
-    {
-        return $this->httpClient->request('GET', self::BASE_URL.$endpoint, [
-            'query' => array_merge([
-                'api_key' => $this->apiKey,
-                'language' => 'fr-FR',
-                'include_adult' => false,
-            ], $params),
-        ]);
+            $data = $response->toArray();
+            $videos = $data['results'] ?? [];
+
+            // On cherche la première bande-annonce
+            $trailer = array_filter(
+                $videos,
+                fn ($video) => 'Trailer' === $video['type'] && 'YouTube' === $video['site']
+            );
+
+            if (empty($trailer)) {
+                return null;
+            }
+
+            $video = reset($trailer); // Premier résultat
+
+            return [
+                'key' => $video['key'],
+                'site' => $video['site'],
+                'type' => $video['type'],
+            ];
+
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 }
